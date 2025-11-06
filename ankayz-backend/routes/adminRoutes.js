@@ -1,22 +1,19 @@
 import express from "express";
-import { verifyToken } from "../middleware/verifyToken.js";
-import { verifyRole } from "../middleware/verifyRole.js";
-import Booking from "../models/Booking.js";
+import multer from "multer";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import {
+  addBooking,
+  getBookings,
+  editBooking,
+  deleteBooking,
+} from "../controllers/bookingController.js";
 
 const router = express.Router();
+const upload = multer(); 
 
-// Admin-only route
-router.get("/bookings", verifyToken, verifyRole("admin"), async (req, res) => {
-  try {
-    const bookings = await Booking.find()
-      .populate("userId", "fullname email phone") // ✅ fix field name
-      .sort({ createdAt: -1 });
-
-    res.json(bookings);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+router.get("/bookings", protect, adminOnly, getBookings);
+router.delete("/bookings/:id", protect, adminOnly, deleteBooking);
+router.post("/bookings", upload.any(), protect, adminOnly, addBooking);
+router.patch("/bookings/:id", upload.any(), protect, adminOnly, editBooking);
 
 export default router;

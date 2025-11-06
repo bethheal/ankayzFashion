@@ -26,3 +26,14 @@ export const protect = async (req, res, next) => {
     res.status(401).json({ success: false, message: "Invalid or expired token" });
   }
 };
+// ✅ Allow only admins to proceed
+export const adminOnly = (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    next(); // proceed
+  } else {
+    res.status(403).json({
+      success: false,
+      message: "Access denied — Admins only",
+    });
+  }
+};
